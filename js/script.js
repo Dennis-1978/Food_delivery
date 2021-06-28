@@ -144,7 +144,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // Показываем модальное окно через 10 секунд
-    const modalTimerId = setTimeout(openModal, 10000);
+    // const modalTimerId = setTimeout(openModal, 10000);
 
     // Показывает модальное окно, если пользователь пролистал всю страницу
     function showModalByScroll () {
@@ -156,4 +156,68 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     window.addEventListener("scroll", showModalByScroll);
+
+    // Используем классы для карточек меню
+
+    class MenuCard {
+        constructor(src, title, alt, descr, price, parentSelector) {
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.parent = document.querySelector(parentSelector);
+            this.transfer = 72; // пока статический курс валют
+            this.changeToRub(); // сразу рассчитываем курс
+        }
+        // Конвертирует курс доллара в рубли
+        changeToRub() {
+            this.price = this.price * this.transfer;
+        }
+
+        // Формирует верстку
+        render() {
+            const element = document.createElement("div"); // создаем элемент "div"
+            element.innerHTML = `
+            <div class="menu__item">
+                <img src=${this.src} alt=${this.alt}>
+                <h3 class="menu__item-subtitle">${this.title}</h3>
+                <div class="menu__item-descr">${this.descr}</div>
+                <div class="menu__item-divider"></div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${this.price}</span> руб/день</div>
+                </div>
+            </div>
+            `;
+            this.parent.append(element);
+        }
+    }
+
+    new MenuCard(
+        "img/tabs/vegy.jpg",
+        'Меню "Фитнес"',
+        "vegy",
+        "Меню 'Фитнес' - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!",        
+        9,
+        ".menu .container"
+    ).render(); // синтаксис - если объект используется только один раз
+
+    new MenuCard(
+        "img/tabs/elite.jpg",
+        'Меню “Премиум”',
+        "elite",
+        "В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!",        
+        14,
+        ".menu .container"
+    ).render();
+
+    new MenuCard(
+        "img/tabs/post.jpg",
+        'Меню "Постное"',
+        "post",
+        "Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.",        
+        11,
+        ".menu .container"
+    ).render();
 });
