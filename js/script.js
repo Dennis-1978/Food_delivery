@@ -60,7 +60,7 @@ window.addEventListener("DOMContentLoaded", () => {
             "days": days,
             "hours": hours,
             "minutes": minutes,
-            "seconds": seconds
+            "seconds": seconds,
         };
     }
 
@@ -100,18 +100,21 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     setClock(".timer", deadline);
 
-       // Modal
-
+    // Modal
     // Создаем модальное окно
     const modalTrigger = document.querySelectorAll("[data-modal]"),
-          modal = document.querySelector(".modal"),
-          modalCloseBtn = document.querySelector("[data-close]");
+          modal = document.querySelector(".modal");
+
+    modalTrigger.forEach(btn => {
+    btn.addEventListener("click", openModal);
+    });
   
     // Открывает модальное окно
     function openModal () {
         modal.classList.add("show");
         modal.classList.remove("hide");
         document.body.style.overflow = "hidden";
+        clearInterval(modalTimerId);
     }
 
     // Закрывает модальное окно
@@ -119,19 +122,11 @@ window.addEventListener("DOMContentLoaded", () => {
         modal.classList.add("hide");
         modal.classList.remove("show");
         document.body.style.overflow = "";
-        clearInterval(modalTimerId);
     }
 
-    modalTrigger.forEach(btn => {
-        btn.addEventListener("click", openModal);
-    });
-
-    // Закрывает модальное окно при клике на "X"
-    modalCloseBtn.addEventListener("click", closeModal);
-
-    // Закрывает модальное окно при клике на подложку
+    // Закрывает модальное окно при клике на подложку или "Х"
     modal.addEventListener("click", (event) => {
-        if (event.target === modal) {
+        if (event.target === modal || event.target.getAttribute("data-close" == "")) {
             closeModal();
         }
     });
@@ -144,7 +139,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // Показываем модальное окно через 10 секунд
-    // const modalTimerId = setTimeout(openModal, 10000);
+    const modalTimerId = setTimeout(openModal, 50000);
 
     // Показывает модальное окно, если пользователь пролистал всю страницу
     function showModalByScroll () {
@@ -157,6 +152,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("scroll", showModalByScroll);
 
+    // Classes
     // Используем классы для карточек меню
 
     class MenuCard {
@@ -181,8 +177,8 @@ window.addEventListener("DOMContentLoaded", () => {
             const element = document.createElement("div"); // создаем элемент "div"
 
             if (this.classes.length === 0) {
-                this.element = "menu__item";
-                element.classList.add(this.element);
+                this.classes = "menu__item";
+                element.classList.add(this.classes);
             } else {
                 this.classes.forEach(className => element.classList.add(className));
             }
@@ -227,4 +223,81 @@ window.addEventListener("DOMContentLoaded", () => {
         11,
         ".menu .container",
     ).render();
+
+    // Forms
+
+    const forms = document.querySelectorAll("form");
+
+    // Создаем объект для вывода текста сообщений
+    const message = {
+        loading: "img/form/spinner.svg",
+        success: "Спасибо! Скоро мы с вами свяжемся",
+        failure: "Что-то пошло не так ...",
+    };
+
+    // Связываем формы с функцией postData
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    // Функция отвечает за постинг данных
+    function postData(form) {
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const statusMessage = document.createElement("img");
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement("afterend", statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open("POST", "server.php");
+            // request.setRequestHeader("Content-type", "multipart/form-data");
+
+            const formData = new FormData(form);
+            request.send(formData);
+
+            request.addEventListener("load", () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    showThanksModal(message.success);
+                    statusMessage.remove();
+                    form.reset();
+                } else {
+                    showThanksModal(message.failure);
+                }
+            });
+        });
+    }
+
+    // После постинга показывает второе модальное окно с сообщением
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector(".modal__dialog");
+
+        prevModalDialog.classList.add("hide");
+        openModal();
+
+        const thanksModal = document.createElement("div");
+        thanksModal.classList.add("modal__dialog");
+
+        // Формируем верстку модального окна
+        thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+        `;
+
+        document.querySelector(".modal").append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add("show");
+            prevModalDialog.classList.remove("hide");
+            closeModal();
+        }, 4000);
+    }
+
 });
