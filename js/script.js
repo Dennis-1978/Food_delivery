@@ -220,6 +220,7 @@ window.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             data.data.forEach(({img, altimg, title, descr, price}) => {
                 new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+            });
         });
 
     // Forms
@@ -335,6 +336,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }, 4000);
     }
 
+    // Получаем доступ к БД
     fetch("db.json")
         .then(data => data.json())
         .then(res => console.log(res));
