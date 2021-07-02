@@ -215,7 +215,7 @@ window.addEventListener("DOMContentLoaded", () => {
     //         });
     //     });
 
-    // Реализация запроса на сервер спомощью axios
+    // Реализация динамической верстки с помощью axios
     axios.get("http://localhost:3000/menu")
         .then(data => {
             data.data.forEach(({img, altimg, title, descr, price}) => {
